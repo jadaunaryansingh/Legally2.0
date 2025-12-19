@@ -1,5 +1,15 @@
 {
   "version": 2,
+  "installCommand": "pnpm install --frozen-lockfile && pip install -r fastapi_server/requirements.txt",
   "buildCommand": "npm run build:client",
-  "outputDirectory": "dist/spa"
+  "outputDirectory": "dist/spa",
+  "functions": {
+    "api/index.py": {
+      "runtime": "python3.11"
+    }
+  },
+  "routes": [
+    { "src": "/api/(.*)", "dest": "api/index.py" },
+    { "src": "/(.*)", "dest": "/dist/spa/$1" }
+  ]
 }
