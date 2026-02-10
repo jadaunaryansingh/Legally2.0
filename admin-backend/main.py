@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import firebase_admin
 from firebase_admin import credentials, auth, db
+# Production deployment - v1.0.1
 from datetime import datetime
 import os
 from dotenv import load_dotenv
