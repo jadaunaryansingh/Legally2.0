@@ -58,12 +58,11 @@ export default function Chat() {
         localStorage.setItem("userId", userId);
         localStorage.setItem("userEmail", userEmail);
 
-        // Save to Firebase to track as a user
+        // Save to Firebase to track as a user (only pass defined values)
         try {
           await saveUserData({
             uid: userId,
             email: userEmail,
-            displayName: "Anonymous User",
           });
           console.log("Anonymous user created:", userId);
         } catch (error) {

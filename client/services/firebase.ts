@@ -102,19 +102,24 @@ export const saveUserData = async (userData: Partial<UserData>) => {
       throw new Error("No user ID provided");
     }
 
+    // Remove undefined values to avoid Firebase errors
+    const cleanUserData = Object.fromEntries(
+      Object.entries(userData).filter(([_, value]) => value !== undefined)
+    );
+
     const userRef = ref(database, `users/${userId}`);
     const snapshot = await get(userRef);
 
     if (snapshot.exists()) {
       // Update existing user
       await update(userRef, {
-        ...userData,
+        ...cleanUserData,
         lastLogin: serverTimestamp(),
       });
     } else {
       // Create new user
       await set(userRef, {
-        ...userData,
+        ...cleanUserData,
         uid: userId,
         createdAt: serverTimestamp(),
         lastLogin: serverTimestamp(),
