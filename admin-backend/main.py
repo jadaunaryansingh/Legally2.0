@@ -488,20 +488,10 @@ async def delete_user(
 @app.post("/api/legal-advice")
 async def get_legal_advice(request: LegalAdviceRequest):
     """
-    Real AI endpoint for getting legal advice using Hugging Face Inference API
-    Uses AdaptLLM/law-chat model for specialized legal responses
+    Real AI endpoint for getting legal advice using Groq API
+    Uses Llama 3.3 70B model for specialized legal responses
     """
     try:
-        hf_token = os.getenv("HF_TOKEN")
-        print(f"DEBUG: HF_TOKEN from env: {hf_token[:10] if hf_token else 'None'}...")
-        
-        if not hf_token or hf_token == "your_huggingface_token_here":
-            print(f"DEBUG: HF_TOKEN is missing or placeholder")
-            raise HTTPException(
-                status_code=503,
-                detail="AI service not configured. Please add HF_TOKEN to .env file."
-            )
-        
         user_message = request.message.strip()
         if not user_message:
             raise HTTPException(
@@ -516,7 +506,10 @@ async def get_legal_advice(request: LegalAdviceRequest):
         
         groq_api_key = os.getenv('GROQ_API_KEY')
         if not groq_api_key or groq_api_key == 'your_groq_api_key_here':
-            raise Exception("GROQ_API_KEY not configured. Get free key from https://console.groq.com/keys")
+            raise HTTPException(
+                status_code=503,
+                detail="AI service not configured. Please add GROQ_API_KEY to environment variables."
+            )
         
         system_prompt = """You are an expert legal assistant specialized in Indian Law and International Law.
 Provide accurate, educational legal information citing relevant acts, sections, and statutes.
@@ -564,17 +557,12 @@ Explain legal principles clearly and recommend consulting qualified lawyers for 
         if "401" in error_msg or "unauthorized" in error_msg:
             raise HTTPException(
                 status_code=503,
-                detail="Invalid HF_TOKEN. Please verify your Hugging Face API token."
+                detail="Invalid GROQ_API_KEY. Please verify your Groq API token."
             )
-        elif "404" in error_msg or "not found" in error_msg:
+        elif "groq" in error_msg:
             raise HTTPException(
                 status_code=503,
-                detail="Model AdaptLLM/law-chat not accessible. It may be private or require special access."
-            )
-        elif "loading" in error_msg:
-            raise HTTPException(
-                status_code=503,
-                detail="Model is loading. Please try again in a moment."
+                detail="Groq API error. Please check your API key and try again."
             )
         
         raise HTTPException(
