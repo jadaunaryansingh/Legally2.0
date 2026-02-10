@@ -7,6 +7,8 @@ import {
   auth,
   signInWithGoogle,
   signInWithGithub,
+  saveUserData,
+  updateLastLogin,
 } from "@/services/firebase";
 
 export default function Login() {
@@ -35,7 +37,37 @@ export default function Login() {
       return;
     }
 
+    // Check if admin email
+    const isAdminEmail = email.toLowerCase() === "admin@legally.com";
+
     try {
+      if (isAdminEmail) {
+        // Admin login - call admin backend API
+        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+        const response = await fetch(`${apiBaseUrl}/api/v1/admin/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.token) {
+          localStorage.setItem("adminToken", data.token);
+          localStorage.setItem("adminEmail", email);
+          localStorage.setItem("isAuthenticated", "true");
+          navigate("/admin/dashboard");
+          return;
+        } else {
+          setError(data.message || "Invalid admin credentials");
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // Normal user login
       if (mode === "signup") {
         const userCredential = await createUserWithEmailAndPassword(
           auth,
@@ -43,6 +75,15 @@ export default function Login() {
           password
         );
         const user = userCredential.user;
+        
+        // Save user data to Firebase Realtime Database
+        await saveUserData({
+          uid: user.uid,
+          email: user.email || email,
+          displayName: user.displayName || undefined,
+          photoURL: user.photoURL || undefined,
+        });
+        
         localStorage.setItem("isAuthenticated", "true");
         localStorage.setItem("userEmail", user.email || email);
         localStorage.setItem("userId", user.uid);
@@ -53,6 +94,10 @@ export default function Login() {
           password
         );
         const user = userCredential.user;
+        
+        // Update last login timestamp
+        await updateLastLogin(user.uid);
+        
         localStorage.setItem("isAuthenticated", "true");
         localStorage.setItem("userEmail", user.email || email);
         localStorage.setItem("userId", user.uid);
@@ -90,6 +135,15 @@ export default function Login() {
 
     try {
       const user = await signInWithGoogle();
+      
+      // Save/update user data to Firebase Realtime Database
+      await saveUserData({
+        uid: user.uid,
+        email: user.email || "",
+        displayName: user.displayName || undefined,
+        photoURL: user.photoURL || undefined,
+      });
+      
       localStorage.setItem("isAuthenticated", "true");
       localStorage.setItem("userEmail", user.email || "");
       localStorage.setItem("userId", user.uid);
@@ -118,6 +172,15 @@ export default function Login() {
 
     try {
       const user = await signInWithGithub();
+      
+      // Save/update user data to Firebase Realtime Database
+      await saveUserData({
+        uid: user.uid,
+        email: user.email || "",
+        displayName: user.displayName || undefined,
+        photoURL: user.photoURL || undefined,
+      });
+      
       localStorage.setItem("isAuthenticated", "true");
       localStorage.setItem("userEmail", user.email || "");
       localStorage.setItem("userId", user.uid);

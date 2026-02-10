@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Send, Scale, BookOpen, AlertCircle } from "lucide-react";
 import BalanceScaleLoader from "@/components/BalanceScaleLoader";
+import { saveChatMessage, getUserChats } from "@/services/firebase";
 
 interface Message {
   id: string;
@@ -30,6 +31,7 @@ export default function Chat() {
   ]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [chatHistoryLoaded, setChatHistoryLoaded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -39,6 +41,46 @@ export default function Chat() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Load chat history from Firebase on mount
+  useEffect(() => {
+    const loadChatHistory = async () => {
+      try {
+        const userId = localStorage.getItem("userId");
+        if (!userId || chatHistoryLoaded) return;
+
+        const chatHistory = await getUserChats(userId);
+        
+        if (chatHistory.length > 0) {
+          // Convert Firebase chat history to Message format
+          const historicalMessages: Message[] = chatHistory.flatMap((chat) => [
+            {
+              id: `${chat.id}-user`,
+              type: "user" as const,
+              content: chat.message,
+              timestamp: new Date(chat.timestamp),
+            },
+            {
+              id: `${chat.id}-ai`,
+              type: "ai" as const,
+              content: chat.response,
+              timestamp: new Date(chat.timestamp),
+            },
+          ]);
+
+          // Prepend greeting message and append historical messages
+          setMessages((prev) => [...prev, ...historicalMessages]);
+        }
+        
+        setChatHistoryLoaded(true);
+      } catch (error) {
+        console.error("Error loading chat history:", error);
+        setChatHistoryLoaded(true);
+      }
+    };
+
+    loadChatHistory();
+  }, [chatHistoryLoaded]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,6 +134,24 @@ export default function Chat() {
         // Remove loading message and add response
         return [...prev.slice(0, -1), aiResponse];
       });
+
+      // Save chat message to Firebase
+      const userId = localStorage.getItem("userId");
+      const userEmail = localStorage.getItem("userEmail");
+      
+      if (userId && userEmail) {
+        try {
+          await saveChatMessage({
+            userId,
+            userEmail,
+            message: inputValue,
+            response: aiResponse.content,
+            category: data.category || "General",
+          });
+        } catch (saveError) {
+          console.error("Error saving chat to Firebase:", saveError);
+        }
+      }
     } catch (error) {
       console.error("Error fetching legal advice, using mock response instead:", error);
 
@@ -104,6 +164,24 @@ export default function Chat() {
       };
 
       setMessages((prev) => [...prev.slice(0, -1), fallbackResponse]);
+
+      // Save fallback chat message to Firebase
+      const userId = localStorage.getItem("userId");
+      const userEmail = localStorage.getItem("userEmail");
+      
+      if (userId && userEmail) {
+        try {
+          await saveChatMessage({
+            userId,
+            userEmail,
+            message: inputValue,
+            response: fallbackResponse.content,
+            category: "General",
+          });
+        } catch (saveError) {
+          console.error("Error saving fallback chat to Firebase:", saveError);
+        }
+      }
     }
 
     setIsLoading(false);

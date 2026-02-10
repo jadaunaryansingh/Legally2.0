@@ -12,6 +12,10 @@ import Chat from "./pages/Chat";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import Laws from "./pages/Laws";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminUsers from "./pages/AdminUsers";
+import AdminQueries from "./pages/AdminQueries";
+import AdminUserDetails from "./pages/AdminUserDetails";
 import BalanceScaleLoader from "./components/BalanceScaleLoader";
 
 const queryClient = new QueryClient();
@@ -144,6 +148,11 @@ const AppContent = () => {
                 )
               }
             />
+            {/* Admin Routes */}
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/users/:userId" element={<AdminUserDetails />} />
+            <Route path="/admin/queries" element={<AdminQueries />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

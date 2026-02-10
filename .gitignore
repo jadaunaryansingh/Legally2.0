@@ -28,3 +28,6 @@ dist-ssr
 .venv/
 __pycache__/
 
+# Firebase private credentials
+firebase-credentials.json
+*-firebase-adminsdk-*.json
