@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Send, Scale, BookOpen, AlertCircle } from "lucide-react";
 import BalanceScaleLoader from "@/components/BalanceScaleLoader";
-import { saveChatMessage, getUserChats, saveUserData } from "@/services/firebase";
+import { saveChatMessage, getUserChats, saveUserData, signInAnonymouslyWithFirebase } from "@/services/firebase";
 
 interface Message {
   id: string;
@@ -46,25 +46,24 @@ export default function Chat() {
   useEffect(() => {
     const initializeUser = async () => {
       let userId = localStorage.getItem("userId");
-      let userEmail = localStorage.getItem("userEmail");
 
-      // If no user ID exists, create an anonymous user
+      // If no user ID exists, sign in anonymously with Firebase
       if (!userId) {
-        // Generate a unique anonymous user ID
-        userId = `anon-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-        userEmail = `${userId}@anonymous.legally.app`;
-
-        // Save to localStorage
-        localStorage.setItem("userId", userId);
-        localStorage.setItem("userEmail", userEmail);
-
-        // Save to Firebase to track as a user (only pass defined values)
         try {
+          // Sign in anonymously through Firebase Authentication
+          const user = await signInAnonymouslyWithFirebase();
+          
+          // Save to localStorage
+          localStorage.setItem("userId", user.uid);
+          localStorage.setItem("userEmail", user.email || `anon-${user.uid}@legally.app`);
+
+          // Save to Firebase Realtime Database
           await saveUserData({
-            uid: userId,
-            email: userEmail,
+            uid: user.uid,
+            email: user.email || `anon-${user.uid}@legally.app`,
           });
-          console.log("Anonymous user created:", userId);
+          
+          console.log("Anonymous user created:", user.uid);
         } catch (error) {
           console.error("Error creating anonymous user:", error);
         }

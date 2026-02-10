@@ -10,6 +10,7 @@ import {
   GoogleAuthProvider,
   GithubAuthProvider,
   signInWithPopup,
+  signInAnonymously,
 } from "firebase/auth";
 import {
   getDatabase,
@@ -68,6 +69,16 @@ const signInWithGithub = async () => {
     return result.user;
   } catch (error) {
     console.error("GitHub sign-in error:", error);
+    throw error;
+  }
+};
+
+const signInAnonymouslyWithFirebase = async () => {
+  try {
+    const result = await signInAnonymously(auth);
+    return result.user;
+  } catch (error) {
+    console.error("Anonymous sign-in error:", error);
     throw error;
   }
 };
@@ -281,4 +292,5 @@ export {
   onAuthStateChangedWithAuth,
   signInWithGoogle,
   signInWithGithub,
+  signInAnonymouslyWithFirebase,
 };
