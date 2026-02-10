@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Send, Scale, BookOpen, AlertCircle } from "lucide-react";
 import BalanceScaleLoader from "@/components/BalanceScaleLoader";
-import { saveChatMessage, getUserChats } from "@/services/firebase";
+import { saveChatMessage, getUserChats, saveUserData } from "@/services/firebase";
 
 interface Message {
   id: string;
@@ -41,6 +41,39 @@ export default function Chat() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Initialize anonymous user if not logged in
+  useEffect(() => {
+    const initializeUser = async () => {
+      let userId = localStorage.getItem("userId");
+      let userEmail = localStorage.getItem("userEmail");
+
+      // If no user ID exists, create an anonymous user
+      if (!userId) {
+        // Generate a unique anonymous user ID
+        userId = `anon-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+        userEmail = `${userId}@anonymous.legally.app`;
+
+        // Save to localStorage
+        localStorage.setItem("userId", userId);
+        localStorage.setItem("userEmail", userEmail);
+
+        // Save to Firebase to track as a user
+        try {
+          await saveUserData({
+            uid: userId,
+            email: userEmail,
+            displayName: "Anonymous User",
+          });
+          console.log("Anonymous user created:", userId);
+        } catch (error) {
+          console.error("Error creating anonymous user:", error);
+        }
+      }
+    };
+
+    initializeUser();
+  }, []);
 
   // Load chat history from Firebase on mount
   useEffect(() => {
