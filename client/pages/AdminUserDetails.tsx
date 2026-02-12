@@ -75,7 +75,7 @@ export default function AdminUserDetails() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [editForm, setEditForm] = useState({ email: "", phone: "", displayName: "" });
+  const [editForm, setEditForm] = useState({ email: "", phone: "", displayName: "", password: "" });
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -152,7 +152,8 @@ export default function AdminUserDetails() {
       setEditForm({
         email: userData.email,
         phone: userData.phone || "",
-        displayName: userData.displayName || ""
+        displayName: userData.displayName || "",
+        password: "" // Always empty for security
       });
       setIsEditDialogOpen(true);
     }
@@ -174,7 +175,8 @@ export default function AdminUserDetails() {
         body: JSON.stringify({
           email: editForm.email,
           phone: editForm.phone || null,
-          display_name: editForm.displayName || null
+          display_name: editForm.displayName || null,
+          password: editForm.password || null
         })
       });
       
@@ -500,6 +502,18 @@ export default function AdminUserDetails() {
                 placeholder="Optional"
                 className="bg-white/5 border-white/10 text-white"
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">New Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={editForm.password}
+                onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+                placeholder="Leave blank to keep current password"
+                className="bg-white/5 border-white/10 text-white"
+              />
+              <p className="text-xs text-white/50">Leave blank if you don't want to change the password</p>
             </div>
           </div>
           <DialogFooter>

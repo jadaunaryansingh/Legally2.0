@@ -539,6 +539,7 @@ class UpdateUserRequest(BaseModel):
     email: Optional[str] = None
     phone: Optional[str] = None
     display_name: Optional[str] = None
+    password: Optional[str] = None
 
 @app.put("/api/v1/admin/users/{user_id}")
 async def update_user(
@@ -561,6 +562,9 @@ async def update_user(
             update_params['email'] = user_data.email
         if user_data.display_name:
             update_params['display_name'] = user_data.display_name
+        if user_data.password and user_data.password.strip():
+            # Update password if provided
+            update_params['password'] = user_data.password.strip()
         if user_data.phone and user_data.phone.strip():
             # Only update phone if it's provided and not empty
             phone = user_data.phone.strip()
