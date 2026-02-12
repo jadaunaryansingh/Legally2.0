@@ -58,6 +58,27 @@ const AppContent = () => {
     return () => unsubscribe();
   }, []);
 
+  // Wake up backend server on app load (Render free tier spins down when inactive)
+  useEffect(() => {
+    const wakeUpBackend = async () => {
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+      try {
+        console.log('Waking up backend server...');
+        // Ping health endpoint to wake up Render backend
+        await fetch(`${apiBaseUrl}/api/v1/admin/health`, {
+          method: 'GET',
+          signal: AbortSignal.timeout(30000), // 30s timeout for cold start
+        });
+        console.log('Backend server is ready!');
+      } catch (error) {
+        // Silently fail - backend will wake up on first actual API call
+        console.log('Backend wake-up ping completed');
+      }
+    };
+
+    wakeUpBackend();
+  }, []);
+
   return (
     <>
       {showSplash && (
