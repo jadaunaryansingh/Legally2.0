@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>">
+    <title>Legally API - Backend Server</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .status {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+        }
+        .endpoints {
+            background: #f9fafb;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .endpoint {
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            padding: 10px;
+            background: white;
+            border-left: 3px solid #667eea;
+            border-radius: 5px;
+        }
+        .method {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .get { background: #10b981; color: white; }
+        .post { background: #f59e0b; color: white; }
+        a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #999;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚖️ Legally API</h1>
+        <p class="subtitle">Legal AI Admin & Chat Backend Server</p>
+        <span class="status">🟢 Server Running</span>
+        
+        <div class="endpoints">
+            <h3 style="margin-bottom: 15px; color: #333;">Available Endpoints</h3>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <a href="/api/v1/admin/health" target="_blank">/api/v1/admin/health</a>
+                <br><small style="color: #666; margin-left: 50px;">Health check endpoint</small>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span>/api/v1/admin/login</span>
+                <br><small style="color: #666; margin-left: 50px;">Admin authentication</small>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span>/api/v1/admin/dashboard</span>
+                <br><small style="color: #666; margin-left: 50px;">Dashboard statistics</small>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span>/api/v1/admin/users</span>
+                <br><small style="color: #666; margin-left: 50px;">List all users</small>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span>/api/v1/admin/queries</span>
+                <br><small style="color: #666; margin-left: 50px;">List all queries</small>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span>/api/legal-advice</span>
+                <br><small style="color: #666; margin-left: 50px;">Get AI legal advice</small>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Frontend Application:</strong> <a href="https://legally2026.netlify.app" target="_blank">legally2026.netlify.app</a></p>
+            <p style="margin-top: 10px;">Powered by FastAPI • Deployed on Vercel</p>
+        </div>
+    </div>
+</body>
+</html>

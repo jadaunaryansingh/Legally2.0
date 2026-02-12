@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse, Response
 from contextlib import asynccontextmanager
 import firebase_admin
 from firebase_admin import credentials, auth, db
@@ -150,9 +151,24 @@ async def verify_admin_token(token: str = None) -> dict:
 
 # Routes
 
-@app.get("/")
+@app.get("/favicon.ico")
+async def favicon():
+    """Serve favicon"""
+    # Return a simple SVG favicon as ICO
+    svg_content = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⚖️</text></svg>"""
+    return Response(content=svg_content, media_type="image/svg+xml")
+
+@app.get("/", response_class=HTMLResponse)
 async def root():
-    """Root endpoint - API information"""
+    """Root endpoint - API information page"""
+    html_path = os.path.join(os.path.dirname(__file__), "public", "index.html")
+    
+    # If HTML file exists, serve it
+    if os.path.exists(html_path):
+        with open(html_path, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    
+    # Fallback JSON response
     return {
         "name": "Legal AI Admin API",
         "version": "1.0.0",
