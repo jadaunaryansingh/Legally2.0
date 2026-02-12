@@ -507,19 +507,87 @@ async def delete_user(
     user_id: str,
     token: str = None
 ):
-    """Delete a user (admin only)"""
+    """Delete a user completely - Auth + all data (admin only)"""
     await verify_admin_token(token)
     
+    if not firebase_initialized:
+        raise HTTPException(status_code=503, detail="Firebase not initialized")
+    
     try:
+        # Delete user from Firebase Auth
         auth.delete_user(user_id)
+        
+        # Delete user data from Realtime Database
+        users_ref = db.reference(f'users/{user_id}')
+        users_ref.delete()
+        
+        # Delete all user chats
+        chats_ref = db.reference(f'chats/{user_id}')
+        chats_ref.delete()
+        
         return {
             "success": True,
-            "message": f"User {user_id} deleted"
+            "message": f"User {user_id} and all associated data deleted successfully"
         }
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Failed to delete user: {str(e)}"
+        )
+
+class UpdateUserRequest(BaseModel):
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    display_name: Optional[str] = None
+
+@app.put("/api/v1/admin/users/{user_id}")
+async def update_user(
+    user_id: str,
+    user_data: UpdateUserRequest,
+    token: str = None
+):
+    """Update user information (admin only)"""
+    await verify_admin_token(token)
+    
+    if not firebase_initialized:
+        raise HTTPException(status_code=503, detail="Firebase not initialized")
+    
+    try:
+        # Update Firebase Auth user
+        update_params = {}
+        if user_data.email:
+            update_params['email'] = user_data.email
+        if user_data.display_name:
+            update_params['display_name'] = user_data.display_name
+        if user_data.phone:
+            update_params['phone_number'] = user_data.phone if user_data.phone.startswith('+') else f'+{user_data.phone}'
+        
+        if update_params:
+            auth.update_user(user_id, **update_params)
+        
+        # Update user data in Realtime Database
+        users_ref = db.reference(f'users/{user_id}')
+        db_updates = {}
+        
+        if user_data.email:
+            db_updates['email'] = user_data.email
+        if user_data.phone:
+            db_updates['phone'] = user_data.phone
+        if user_data.display_name:
+            db_updates['displayName'] = user_data.display_name
+        
+        if db_updates:
+            users_ref.update(db_updates)
+        
+        return {
+            "success": True,
+            "message": "User updated successfully",
+            "user_id": user_id
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to update user: {str(e)}"
         )
 
 # ============ LEGAL ADVICE ENDPOINT (PUBLIC) ============
