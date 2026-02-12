@@ -1,0 +1,3 @@
+# Ignore everything from root except admin-backend
+/*
+!/admin-backend
