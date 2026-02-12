@@ -173,13 +173,15 @@ export default function AdminUserDetails() {
         },
         body: JSON.stringify({
           email: editForm.email,
-          phone: editForm.phone,
-          display_name: editForm.displayName
+          phone: editForm.phone || null,
+          display_name: editForm.displayName || null
         })
       });
       
+      const data = await response.json();
+      
       if (!response.ok) {
-        throw new Error("Failed to update user");
+        throw new Error(data.detail || "Failed to update user");
       }
       
       toast({
@@ -193,7 +195,7 @@ export default function AdminUserDetails() {
       console.error("Update user error:", error);
       toast({
         title: "Error",
-        description: "Failed to update user",
+        description: error instanceof Error ? error.message : "Failed to update user",
         variant: "destructive",
       });
     } finally {
