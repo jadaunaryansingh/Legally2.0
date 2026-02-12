@@ -560,10 +560,21 @@ async def update_user(
         if user_data.display_name:
             update_params['display_name'] = user_data.display_name
         if user_data.phone:
-            update_params['phone_number'] = user_data.phone if user_data.phone.startswith('+') else f'+{user_data.phone}'
+            # Only update phone if it's provided and not empty
+            phone = user_data.phone.strip()
+            if phone:
+                # Ensure phone is in E.164 format
+                if not phone.startswith('+'):
+                    phone = f'+{phone}'
+                update_params['phone_number'] = phone
         
+        # Update Firebase Auth only if there are params
         if update_params:
-            auth.update_user(user_id, **update_params)
+            try:
+                auth.update_user(user_id, **update_params)
+            except Exception as auth_error:
+                print(f"Firebase Auth update error: {auth_error}")
+                # Continue anyway to update database
         
         # Update user data in Realtime Database
         users_ref = db.reference(f'users/{user_id}')
@@ -584,7 +595,10 @@ async def update_user(
             "message": "User updated successfully",
             "user_id": user_id
         }
+    except HTTPException:
+        raise
     except Exception as e:
+        print(f"Update user error: {type(e).__name__}: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Failed to update user: {str(e)}"
