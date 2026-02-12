@@ -17,5 +17,5 @@ print(f"GROQ_API_KEY: {'SET' if os.getenv('GROQ_API_KEY') else 'NOT SET'}")
 print(f"FIREBASE_DATABASE_URL: {os.getenv('FIREBASE_DATABASE_URL', 'NOT SET')}")
 print("=============================")
 
-# Mangum adapter for Vercel serverless
-handler = Mangum(app)
+# Mangum adapter for Vercel serverless - Vercel looks for 'handler'
+handler = Mangum(app, lifespan="off")
