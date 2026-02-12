@@ -12,12 +12,9 @@ interface Message {
   timestamp?: Date;
 }
 
-// Use FastAPI + Hugging Face backend endpoint
-// In production (Vercel), use relative URL to hit serverless function
-// In development, use explicit localhost URL
-const LEGAL_API_URL =
-  import.meta.env.VITE_LEGAL_API_URL ||
-  (import.meta.env.PROD ? "/api/legal-advice" : "http://localhost:8000/api/legal-advice");
+// Use FastAPI backend endpoint - always use VITE_API_BASE_URL
+const BASE_API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const LEGAL_API_URL = `${BASE_API_URL}/api/legal-advice`;
 
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([

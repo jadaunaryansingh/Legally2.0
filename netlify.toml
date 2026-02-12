@@ -2,6 +2,9 @@
   command = "pnpm run build:client"
   publish = "dist/spa"
 
+[build.environment]
+  VITE_API_BASE_URL = "https://legally-backend.onrender.com"
+
 # SPA fallback - serve index.html for all routes
 [[redirects]]
   from = "/*"
