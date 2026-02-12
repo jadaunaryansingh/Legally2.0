@@ -1,14 +1,17 @@
-"""
-Vercel Serverless Handler for FastAPI
-"""
-import sys
-import os
+from http.server import BaseHTTPRequestHandler
+import json
 
-# Simple test handler first
-def handler(event, context):
-    """Simple test to see if deployment works"""
-    return {
-        "statusCode": 200,
-        "headers": {"Content-Type": "application/json"},
-        "body": '{"status": "Backend is working!", "message": "FastAPI not loaded yet - testing basic deployment"}'
-    }
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        
+        response = {
+            "status": "Backend is working!",
+            "message": "Vercel deployment successful",
+            "path": self.path
+        }
+        
+        self.wfile.write(json.dumps(response).encode())
+        return
