@@ -4,18 +4,11 @@ Vercel Serverless Handler for FastAPI
 import sys
 import os
 
-# Add parent directory to path so we can import main
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from main import app
-from mangum import Mangum
-
-# Print environment variables for debugging
-print("=== Environment Variables ===")
-print(f"CORS_ORIGINS: {os.getenv('CORS_ORIGINS', 'NOT SET')}")
-print(f"GROQ_API_KEY: {'SET' if os.getenv('GROQ_API_KEY') else 'NOT SET'}")
-print(f"FIREBASE_DATABASE_URL: {os.getenv('FIREBASE_DATABASE_URL', 'NOT SET')}")
-print("=============================")
-
-# Mangum adapter for Vercel serverless - Vercel looks for 'handler'
-handler = Mangum(app, lifespan="off")
+# Simple test handler first
+def handler(event, context):
+    """Simple test to see if deployment works"""
+    return {
+        "statusCode": 200,
+        "headers": {"Content-Type": "application/json"},
+        "body": '{"status": "Backend is working!", "message": "FastAPI not loaded yet - testing basic deployment"}'
+    }
