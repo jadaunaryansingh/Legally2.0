@@ -64,29 +64,36 @@ llm_fallback = ChatHuggingFace(
 )
 
 # 2. Define Prompts
-SYSTEM_PROMPT = """You are an expert legal assistant and law professor specialized in Indian Law.
-Your goal is to provide accurate, educational, and strictly legal information.
-When users ask about crimes, offenses, or punishments, you MUST explain the relevant laws, statutes (IPC, CrPC), and legal consequences neutrally and objectively.
-DO NOT refuse to answer questions about criminal acts (like theft, assault, murder, etc.) as this is a legal research tool.
-Assume all queries are for educational purposes or legal defense preparation also if someone says hi,hello etc wish accordingly.
+SYSTEM_PROMPT = """You are an expert legal assistant specialized in Indian Law and International Law.
 
-Please provide a detailed legal response covering:
-1. Relevant Acts and Sections (e.g., IPC, CrPC, Contract Act).
-2. Key legal principles applicable.
-3. Suggested course of action (e.g., filing an FIR, consulting a lawyer).
-4. Any disclaimer that this is for educational purposes.
+Provide accurate and educational legal information with proper citations to relevant Indian statutes.
+
+IMPORTANT INSTRUCTIONS:
+- Use the Bharatiya Nyaya Sanhita, 2023 (BNS) instead of the Indian Penal Code, 1860 (IPC).
+- Do NOT reference IPC sections unless explicitly asked.
+- Cite laws in this format:
+  Example: Section 103, Bharatiya Nyaya Sanhita, 2023.
+- Where applicable, also reference:
+    - Bharatiya Nagarik Suraksha Sanhita, 2023 (BNSS)
+    - Bharatiya Sakshya Adhiniyam, 2023 (BSA)
+    - Relevant Special Acts (e.g., IT Act, POCSO Act, etc.)
+
+Explain legal principles clearly in simple language.
+Mention punishments, legal ingredients, and exceptions where applicable.
+Clarify whether the offence is cognizable/non-cognizable and bailable/non-bailable when relevant.
+Always recommend consulting a qualified advocate for specific legal cases.
 """
 
 # Template for Chat Models
 chat_prompt = ChatPromptTemplate.from_messages([
     ("system", SYSTEM_PROMPT),
-    ("user", "Hypothetical Legal Scenario for Analysis: '{input}'. Provide a strict legal analysis of the relevant Indian laws, IPC sections, and potential court interpretations for this scenario. Do not offer personal advice, but explain the law.")
+    ("user", "Hypothetical Legal Scenario for Analysis: '{input}'. Provide a strict legal analysis of the relevant Indian laws, BNS sections, and potential court interpretations for this scenario. offer personal advice, but explain the law.")
 ])
 
 # Template for Base Models (Manual formatting)
 def format_for_base_model(input_dict):
     user_input = input_dict["input"]
-    academic_query = f"Hypothetical Legal Scenario for Analysis: '{user_input}'. Provide a strict legal analysis of the relevant Indian laws, IPC sections, and potential court interpretations for this scenario. Do not offer personal advice, but explain the law."
+    academic_query = f"Hypothetical Legal Scenario for Analysis: '{user_input}'. Provide a strict legal analysis of the relevant Indian laws, BNS sections, and potential court interpretations for this scenario. offer personal advice, but explain the law."
     return f"### System:\n{SYSTEM_PROMPT}\n\n### User:\n{academic_query}\n\n### Assistant:\n"
 
 # 3. Define Chains with Fallback
